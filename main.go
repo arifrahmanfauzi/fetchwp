@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -34,7 +35,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+
+		}
+	}(db)
 
 	url := "https://funbahasa.com/wp-json/wp/v2/posts?_fields=id,title,date,slug,status,type,categories,tags,content&order=desc&per_page=100&page=3"
 
@@ -56,7 +62,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error making request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(resp.Body)
 
 	// Unmarshal the JSON response
 	var posts []Post
@@ -69,7 +80,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error preparing statement: %v", err)
 	}
-	defer stmt.Close()
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+
+		}
+	}(stmt)
 
 	// Loop through the posts and insert into MySQL
 	for _, post := range posts {
